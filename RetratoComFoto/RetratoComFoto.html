@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+.circular--portrait {
+  position: relative;
+  width: 800px;
+  height: 1200px;
+  overflow: hidden;
+}
+.circular--portrait img:first-child {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: auto;
+}
+
+.circular--portrait img:last-child {
+  position: absolute;
+  top: 46%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50%;
+  height: 45%;
+  border-radius: 50%;
+}
+  </style>
+</head>
+<body>
+  <div class="circular--portrait">
+    <img src="Portrait.jfif" alt="Frame" >
+    <img src="gettyimages.jpg" alt="Photo" >
+  </div>
+</body>
+</html>
