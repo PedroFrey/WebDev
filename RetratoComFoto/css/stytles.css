@@ -1,0 +1,46 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+}
+.circular--portrait {
+    position: relative;
+    width: 800px;
+    height: 1200px;
+    overflow: hidden;
+  }
+  .circular--portrait img:first-child {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+  }
+  
+  .circular--portrait img:last-child {
+    position: absolute;
+    top: 46%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50%;
+    height: 45%;
+    border-radius: 50%;
+  }
+  /* This is how you comment on a CSS*/
+.container {
+    width: 80%;
+    margin: 0 auto;
+}
+
+h1 {
+    color: #333;
+    text-align: center;
+}
+
+p {
+    font-size: 10em;
+    line-height: 1.6;
+    color: #666;
+    text-align: center;
+}
