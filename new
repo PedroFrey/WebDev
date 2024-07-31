@@ -1,0 +1,78 @@
+import streamlit as st
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Set up the page layout
+st.set_page_config(page_title="Cool Streamlit Dashboard", layout="wide")
+
+# Title and description
+st.title("Cool Streamlit Dashboard")
+st.write("This is an interactive dashboard built with Streamlit. Explore the data visualizations below.")
+
+# Sidebar for user inputs
+st.sidebar.header("User Inputs")
+num_points = st.sidebar.slider("Number of points", min_value=100, max_value=1000, value=500)
+random_seed = st.sidebar.number_input("Random seed", value=42)
+
+# Generate random data
+np.random.seed(random_seed)
+data = pd.DataFrame({
+    'x': np.random.randn(num_points),
+    'y': np.random.randn(num_points),
+    'z': np.random.randn(num_points)
+})
+
+# Display data summary
+st.header("Data Summary")
+st.write(data.describe())
+
+# Plotting
+st.header("Data Visualizations")
+
+# Scatter plot
+st.subheader("Scatter Plot")
+scatter_col1, scatter_col2 = st.columns(2)
+with scatter_col1:
+    st.write("X vs Y")
+    fig, ax = plt.subplots()
+    sns.scatterplot(data=data, x='x', y='y', ax=ax)
+    st.pyplot(fig)
+with scatter_col2:
+    st.write("X vs Z")
+    fig, ax = plt.subplots()
+    sns.scatterplot(data=data, x='x', y='z', ax=ax)
+    st.pyplot(fig)
+
+# Histogram
+st.subheader("Histogram")
+hist_col1, hist_col2 = st.columns(2)
+with hist_col1:
+    st.write("X distribution")
+    fig, ax = plt.subplots()
+    sns.histplot(data['x'], bins=30, kde=True, ax=ax)
+    st.pyplot(fig)
+with hist_col2:
+    st.write("Y distribution")
+    fig, ax = plt.subplots()
+    sns.histplot(data['y'], bins=30, kde=True, ax=ax)
+    st.pyplot(fig)
+
+# Heatmap
+st.subheader("Correlation Heatmap")
+fig, ax = plt.subplots()
+sns.heatmap(data.corr(), annot=True, cmap='coolwarm', ax=ax)
+st.pyplot(fig)
+
+# User feedback
+st.header("User Feedback")
+feedback = st.text_area("What do you think about this dashboard?", "")
+if st.button("Submit Feedback"):
+    st.write("Thank you for your feedback!")
+
+# Footer
+st.markdown("""
+---
+Built with ❤️ using [Streamlit](https://streamlit.io/).
+""")
