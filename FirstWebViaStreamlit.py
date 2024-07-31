@@ -1,4 +1,4 @@
-path = 'cd' + r'C:\Users\ptfrey\Music\Github\WebDev'
+pathATcmd = 'cd' + r'C:\Users\ptfrey\Music\Github\WebDev'
 
 # On a CMD prompt i need the folowing code to run this Site python -m streamlit run FirstWebViaStreamlit.py
 
