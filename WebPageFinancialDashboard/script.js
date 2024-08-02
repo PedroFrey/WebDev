@@ -24,14 +24,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 data: revenueData,
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 2,
-                fill: false
+                fill: true
             }]
         },
         options: {
             responsive: true,
             scales: {
                 y: {
-                    beginAtZero: true
+                    beginAtZero: false
                 }
             }
         }
@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const expensesChart = new Chart(expensesCtx, {
         type: 'pie',
         data: {
-            labels: ['Rent', 'Utilities', 'Salaries', 'Marketing', 'Miscellaneous'],
+            labels: ['Rent', 'Utilities', 'Salaries', 'Marketing', 'Miscellaneous','Other'],
             datasets: [{
                 label: 'Expenses',
                 data: expensesData,
@@ -51,14 +51,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     'rgba(54, 162, 235, 0.2)',
                     'rgba(255, 206, 86, 0.2)',
                     'rgba(75, 192, 192, 0.2)',
-                    'rgba(153, 102, 255, 0.2)'
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(188, 188, 255, 0.2)'
                 ],
                 borderColor: [
                     'rgba(255, 99, 132, 1)',
                     'rgba(54, 162, 235, 1)',
                     'rgba(255, 206, 86, 1)',
                     'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)'
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(188, 188, 255, 0.2)'
                 ],
                 borderWidth: 1
             }]

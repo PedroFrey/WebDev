@@ -14,7 +14,7 @@ body {
 header {
     background: #333;
     color: #fff;
-    padding: 20px 0;
+    padding: 10px 0;
     text-align: center;
 }
 
@@ -25,13 +25,21 @@ main {
     margin-top: 20px;
 }
 
-.chart, .data {
-    width: 48%;
+.chart {
+    width: 40%;
     background: #fff;
     padding: 20px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
 }
+.data {
+    width: 50%;
+    background: #fff;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
 
 h1, h2 {
     margin: 0;
