@@ -1,12 +1,27 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const financialData = [
+        { month: 'January', revenue: 12000, expenses: 5000 },
+        { month: 'February', revenue: 15000, expenses: 2000 },
+        { month: 'March', revenue: 17000, expenses: 8000 },
+        { month: 'April', revenue: 14000, expenses: 3000 },
+        { month: 'May', revenue: 19000, expenses: 1000 },
+        { month: 'June', revenue: 22000, expenses: 7000 }
+    ];
+
+    // Extracting revenue and expenses data from the financialData array
+    const months = financialData.map(data => data.month);
+    const revenueData = financialData.map(data => data.revenue);
+    const expensesData = financialData.map(data => data.expenses);
+
+    // Financial chart
     const ctx = document.getElementById('financialChart').getContext('2d');
     const financialChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+            labels: months,
             datasets: [{
                 label: 'Revenue',
-                data: [12000, 15000, 17000, 14000, 19000, 22000],
+                data: revenueData,
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 2,
                 fill: false
@@ -22,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Expenses chart
     const expensesCtx = document.getElementById('expensesChart').getContext('2d');
     const expensesChart = new Chart(expensesCtx, {
         type: 'pie',
@@ -29,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
             labels: ['Rent', 'Utilities', 'Salaries', 'Marketing', 'Miscellaneous'],
             datasets: [{
                 label: 'Expenses',
-                data: [5000, 2000, 8000, 3000, 1000],
+                data: expensesData,
                 backgroundColor: [
                     'rgba(255, 99, 132, 0.2)',
                     'rgba(54, 162, 235, 0.2)',
@@ -52,19 +68,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    const financialData = [
-        { month: 'January', revenue: 12000 },
-        { month: 'February', revenue: 15000 },
-        { month: 'March', revenue: 17000 },
-        { month: 'April', revenue: 14000 },
-        { month: 'May', revenue: 19000 },
-        { month: 'June', revenue: 22000 }
-    ];
-
+    // Display financial data in a list
     const financialDataList = document.getElementById('financialData');
     financialData.forEach(data => {
         const listItem = document.createElement('li');
-        listItem.textContent = `${data.month}: $${data.revenue}`;
+        listItem.textContent = `${data.month}: Revenue $${data.revenue}, Expenses $${data.expenses}`;
         financialDataList.appendChild(listItem);
     });
 });
