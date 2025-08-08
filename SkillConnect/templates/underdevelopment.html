@@ -1,0 +1,216 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillConnect - Under Construction</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --secondary: #2ecc71;
+            --text: #333;
+            --light-bg: #f9f9f9;
+            --border: #e0e0e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-icon {
+            margin-right: 10px;
+            font-size: 28px;
+        }
+
+        nav a {
+            margin-left: 20px;
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--primary);
+        }
+
+        .construction-content {
+            text-align: center;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .construction-icon {
+            font-size: 80px;
+            color: var(--primary);
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: var(--primary-dark);
+        }
+
+        p {
+            font-size: 18px;
+            max-width: 600px;
+            margin: 0 auto 30px;
+            color: #666;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--primary);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+            margin-left: 15px;
+        }
+
+        .btn-secondary:hover {
+            background-color: #27ae60;
+        }
+
+        .timeline {
+            max-width: 500px;
+            margin: 40px auto;
+            text-align: left;
+            border-left: 2px solid var(--primary);
+            padding-left: 30px;
+        }
+
+        .timeline-item {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .timeline-item:before {
+            content: '';
+            width: 15px;
+            height: 15px;
+            background-color: var(--primary);
+            position: absolute;
+            left: -38px;
+            top: 5px;
+            border-radius: 50%;
+        }
+
+        .timeline-date {
+            font-weight: bold;
+            color: var(--primary-dark);
+            margin-bottom: 5px;
+        }
+
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            padding: 20px 0;
+            border-top: 1px solid var(--border);
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="#" class="logo">
+                <span class="logo-icon">⚡</span>
+                SkillConnect
+            </a>
+            <nav>
+                <a href="#">Home</a>
+                <a href="#">About</a>
+                <a href="#">Services</a>
+                <a href="#">Contact</a>
+            </nav>
+        </header>
+
+        <main class="construction-content">
+            <div class="construction-icon">🛠️</div>
+            <h1>This Page is Under Construction</h1>
+            <p>We're working hard to bring you amazing new features and content. This section of SkillConnect is currently being developed and will be available soon.</p>
+
+            <div>
+                <a href="#" class="btn">Back to Home</a>
+                <a href="#" class="btn btn-secondary">Explore Available Features</a>
+            </div>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">Phase 1: Planning</div>
+                    <div class="timeline-text">Design and user experience mapping - Completed</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">Phase 2: Development</div>
+                    <div class="timeline-text">Building core functionality - In Progress</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">Phase 3: Testing</div>
+                    <div class="timeline-text">Quality assurance and user testing - Coming Soon</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">Phase 4: Launch</div>
+                    <div class="timeline-text">Feature release and ongoing improvements</div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <div>&copy; 2025 SkillConnect. All rights reserved.</div>
+        </footer>
+    </div>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillConnect - Gestão de Usuários</title>
+    <link rel="stylesheet" href="register_styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="#" class="logo">
+                <span class="logo-icon">⚡</span>
+                SkillConnect
+            </a>
+            <nav>
+                <a href="#">Dashboard</a>
+                <a href="#">Usuários</a>
+                <a href="#">Settings</a>
+                <a href="#">Help</a>
+            </nav>
+        </header>
+
+        <div class="dashboard">
+            <div class="card">
+                <h2><span class="icon">👤</span> Adicionar novo usuário</h2>
+                <form method="POST" action="/register" id="userForm">
+                    <div class="form-group">
+                        <label for="name">Full Name:</label>
+                        <input type="text" id="name" name="name" required placeholder="Enter user's full name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address:</label>
+                        <input type="email" id="email" name="email" required placeholder="email@example.com">
+                        <p class="form-help">User will receive a verification email at this address</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <div class="input-group">
+                            <input type="password" id="password" name="password" required placeholder="Create a strong password">
+                            <span class="password-toggle" onclick="togglePassword()">👁️</span>
+                        </div>
+                        <div class="password-strength">
+                            <div class="strength-meter" id="strengthMeter"></div>
+                        </div>
+                        <p class="form-help">Use 8+ characters with a mix of letters, numbers & symbols</p>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="submit" class="button">Add User</button>
+                        <button type="reset" class="button button-secondary">Reset Form</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2><span class="icon">📋</span> Current Users</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th class="action-column">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ user[0] }}</td>
+                            <td>{{ user[1] }}</td>
+                            <td>{{ user[2] }}</td>
+                            <td><span class="badge badge-success">Active</span></td>
+                            <td class="action-column">
+                                <button class="action-button">✏️</button>
+                                <button class="action-button delete-button">❌</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        <tr>
+                            <td>0</td>
+                            <td>John Doe</td>
+                            <td>john@example.com</td>
+                            <td><span class="badge badge-success">Active</span></td>
+                            <td class="action-column">
+                                <button class="action-button">✏️</button>
+                                <button class="action-button delete-button">❌</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Jane Smith</td>
+                            <td>jane@example.com</td>
+                            <td><span class="badge badge-warning">Pending</span></td>
+                            <td class="action-column">
+                                <button class="action-button">✏️</button>
+                                <button class="action-button delete-button">❌</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <footer>
+            <div>&copy; 2025 SkillConnect. All rights reserved.</div>
+        </footer>
+    </div>
+
+    <script>
+        // Toggle password visibility
+        function togglePassword() {
+            const passwordField = document.getElementById('password');
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+            } else {
+                passwordField.type = 'password';
+            }
+        }
+
+        // Simple password strength meter
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const meter = document.getElementById('strengthMeter');
+
+            // Simple strength calculation
+            let strength = 0;
+            if (password.length > 0) strength += 20;
+            if (password.length >= 8) strength += 20;
+            if (/[A-Z]/.test(password)) strength += 20;
+            if (/[0-9]/.test(password)) strength += 20;
+            if (/[^A-Za-z0-9]/.test(password)) strength += 20;
+
+            // Update meter
+            meter.style.width = strength + '%';
+
+            // Change color based on strength
+            if (strength < 40) {
+                meter.style.backgroundColor = '#e74c3c';
+            } else if (strength < 70) {
+                meter.style.backgroundColor = '#f39c12';
+            } else {
+                meter.style.backgroundColor = '#2ecc71';
+            }
+        });
+    </script>
+</body>
+</html>
