@@ -1,0 +1,118 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Projetos</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+</head>
+<body>
+
+<div class="container">
+
+    <h1>📋 Gerenciador de Projetos</h1>
+
+    <div class="card">
+
+        <h2>Novo Projeto</h2>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-grid">
+
+                <div class="field">
+                    <label>Projeto</label>
+                    <input type="text" name="nome" required>
+                </div>
+
+                <div class="field">
+                    <label>Área</label>
+                    <input type="text" name="area" required>
+                </div>
+
+                <div class="field">
+                    <label>Responsável</label>
+                    <input type="text" name="responsavel" required>
+                </div>
+
+                <div class="field">
+                    <label>Atividade</label>
+                    <input type="text" name="atividade" required>
+                </div>
+
+                <div class="field">
+                    <label>Data de Início</label>
+                    <input type="date" name="data_inicio" required>
+                </div>
+
+                <div class="field">
+                    <label>Duração (dias)</label>
+                    <input type="number" name="duracao_dias" required>
+                </div>
+
+                <div class="field">
+                    <label>Dependência</label>
+                    <input type="text" name="dependencia">
+                </div>
+
+            </div>
+
+            <button type="submit">
+                Salvar Projeto
+            </button>
+
+        </form>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Projetos Cadastrados</h2>
+
+        <table>
+
+            <tr>
+                <th>Projeto</th>
+                <th>Área</th>
+                <th>Responsável</th>
+                <th>Atividade</th>
+                <th>Início</th>
+                <th>Duração</th>
+                <th>Dependência</th>
+                <th>Ações</th>
+            </tr>
+
+            {% for projeto in projetos %}
+            <tr>
+                <td>{{ projeto.nome }}</td>
+                <td>{{ projeto.area }}</td>
+                <td>{{ projeto.responsavel }}</td>
+                <td>{{ projeto.atividade }}</td>
+                <td>{{ projeto.data_inicio }}</td>
+                <td>{{ projeto.duracao_dias }}</td>
+                <td>{{ projeto.dependencia }}</td>
+
+                <td class="acoes">
+                    <a href="#" class="editar">Editar</a>
+                    <a href="#" class="excluir">Excluir</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8">
+                    Nenhum projeto cadastrado.
+                </td>
+            </tr>
+            {% endfor %}
+
+        </table>
+
+    </div>
+
+</div>
+
+</body>
+</html>

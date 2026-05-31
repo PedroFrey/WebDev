@@ -1,42 +1,21 @@
 from django.db import models
 
-class Area(models.Model):
-    nome = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.nome
-
-
-class Responsavel(models.Model):
-    nome = models.CharField(max_length=100)
-    email = models.EmailField()
-
-    def __str__(self):
-        return self.nome
-
-
 class Projeto(models.Model):
     nome = models.CharField(max_length=200)
-    descricao = models.TextField(blank=True)
 
-    def __str__(self):
-        return self.nome
+    area = models.CharField(max_length=100)
 
+    responsavel = models.CharField(max_length=100)
 
-class Etapa(models.Model):
-    projeto = models.ForeignKey(
-        Projeto,
-        on_delete=models.CASCADE
-    )
-
-    nome = models.CharField(max_length=200)
+    atividade = models.CharField(max_length=200)
 
     data_inicio = models.DateField()
-    data_fim = models.DateField()
 
-    responsavel = models.ForeignKey(
-        Responsavel,
-        on_delete=models.CASCADE
+    duracao_dias = models.IntegerField()
+
+    dependencia = models.CharField(
+        max_length=200,
+        blank=True
     )
 
     def __str__(self):

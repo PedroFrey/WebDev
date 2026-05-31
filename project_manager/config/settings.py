@@ -26,9 +26,11 @@ SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
-
+CSRF_TRUSTED_ORIGINS = [
+    "https://localhost:8000",
+]
 # Application definition
 
 INSTALLED_APPS = [
@@ -38,6 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    'projetos.apps.ProjetosConfig'
 ]
 
 MIDDLEWARE = [
@@ -55,7 +58,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -116,3 +119,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
+
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
