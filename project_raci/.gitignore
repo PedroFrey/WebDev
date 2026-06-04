@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.telas/__pycache__/
+.venv/
+venv/
+
+.env

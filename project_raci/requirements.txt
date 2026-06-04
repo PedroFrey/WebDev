@@ -1,0 +1,8 @@
+nicegui
+sqlalchemy
+pandas
+duckdb
+python-dotenv
+openpyxl
+plotly
+networkx
