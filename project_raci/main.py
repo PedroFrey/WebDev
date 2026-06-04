@@ -1,15 +1,48 @@
-from db import create_database
-
 from nicegui import ui
 
-from telas.responsaveis import criar_tela
+from db import create_database
 
-# create_database()
-# print("Banco criado com sucesso!")
+from telas.dashboard import tela_dashboard
+from telas.responsaveis import tela_responsaveis
+from telas.projetos import tela_projetos
+from telas.atividades import tela_alocacao
+from telas.dependencias import tela_dependencias
+from telas.gantt import tela_gantt
 
-criar_tela()
+create_database()
+
+
+@ui.page('/')
+def dashboard():
+    tela_dashboard()
+
+
+@ui.page('/responsaveis')
+def responsaveis():
+    tela_responsaveis()
+
+
+@ui.page('/projetos')
+def projetos():
+    tela_projetos()
+
+
+@ui.page('/atividades')
+def atividades():
+    tela_alocacao()
+
+
+@ui.page('/dependencias')
+def dependencias():
+    tela_dependencias()
+
+
+@ui.page('/gantt')
+def gantt():
+    tela_gantt()
+
 
 ui.run(
-    title="Project RACI",
+    title='Projeto RACI',
     reload=True
 )

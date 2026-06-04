@@ -1,9 +1,7 @@
 import sqlite3
 import os
 
-DB_PATH = "database.db"
-
-print("DB_PATH:", os.path.abspath(DB_PATH))
+DB_PATH = "/workspaces/WebDev/project_raci/database.db"
 
 SEED_FILES = [
     "sql/seed_etapas.sql",

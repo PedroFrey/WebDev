@@ -1,73 +1,69 @@
 from nicegui import ui
+from components.layout import pagina
+from components.crud_template import crud_page
 
 from crud import (
     listar_areas,
+    listar_responsaveis,
     criar_responsavel,
-    listar_responsaveis
+    atualizar_responsavel,
+    excluir_responsavel,
 )
 
 
-def criar_tela():
+def tela_responsaveis():
 
     areas = listar_areas()
 
     area_options = {
-        area["id_area"]: area["area"]
-        for area in areas
+        a["id_area"]: a["area"]
+        for a in areas
     }
 
-    nome = ui.input("Responsável")
+    nome = None
+    area = None
 
-    area = ui.select(
-        options=area_options,
-        label="Área"
-    )
+    def form():
+        nonlocal nome, area
 
-    tabela = ui.table(
-        columns=[
-            {
-                "name": "id",
-                "label": "ID",
-                "field": "id_responsavel"
-            },
-            {
-                "name": "responsavel",
-                "label": "Responsável",
-                "field": "responsavel"
-            },
-            {
-                "name": "area",
-                "label": "Área",
-                "field": "area"
-            },
-        ],
-        rows=[],
-        row_key="id_responsavel"
-    )
+        nome = ui.input("Nome").props("outlined").classes("flex-grow")
 
+        area = ui.select(
+            area_options,
+            label="Área"
+        ).props("outlined").classes("w-64")
 
-    def atualizar_tabela():
-        tabela.rows = [
-            dict(row)
-            for row in listar_responsaveis()
-        ]
-        tabela.update()
-
-
-    def salvar():
-        criar_responsavel(
-            nome.value,
+    def obter():
+        return [
+            nome.value.strip(),
             area.value
-        )
+        ]
 
+    def preencher(row):
+        nome.value = row["responsavel"]
+        area.value = row["id_area"]
+
+    def limpar():
         nome.value = ""
+        area.value = None
 
-        atualizar_tabela()
+    with pagina("Responsáveis"):
 
-
-    ui.button(
-        "Salvar",
-        on_click=salvar
-    )
-
-    atualizar_tabela()
+        crud_page(
+            titulo="Responsáveis",
+            subtitulo="Cadastro de responsáveis",
+            columns=[
+                {"name": "id_responsavel", "label": "ID", "field": "id_responsavel"},
+                {"name": "responsavel", "label": "Responsável", "field": "responsavel"},
+                {"name": "area", "label": "Área", "field": "area"},
+            ],
+            listar_func=listar_responsaveis,
+            salvar_func=criar_responsavel,
+            atualizar_func=atualizar_responsavel,
+            excluir_func=excluir_responsavel,
+            form_builder=form,
+            obter_form=obter,
+            preencher_form=preencher,
+            limpar_form=limpar,
+            id_field="id_responsavel",
+        )
