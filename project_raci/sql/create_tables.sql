@@ -105,14 +105,12 @@ CREATE TABLE IF NOT EXISTS tb_status (
 CREATE TABLE IF NOT EXISTS tb_alocacao (
     id_projeto INTEGER NOT NULL,
     id_atividade INTEGER NOT NULL,
-    id_responsavel INTEGER NOT NULL,
     id_raci INTEGER NOT NULL,
     id_area INTEGER NOT NULL,
 
     PRIMARY KEY (
         id_projeto,
         id_atividade,
-        id_responsavel,
         id_raci
     ),
 
@@ -121,9 +119,6 @@ CREATE TABLE IF NOT EXISTS tb_alocacao (
 
     FOREIGN KEY (id_atividade)
         REFERENCES tb_atividade(id_atividade),
-
-    FOREIGN KEY (id_responsavel)
-        REFERENCES tb_responsavel(id_responsavel),
 
     FOREIGN KEY (id_raci)
         REFERENCES tb_legenda_raci(id_raci),

@@ -5,7 +5,7 @@ from db import create_database
 from telas.dashboard import tela_dashboard
 from telas.responsaveis import tela_responsaveis
 from telas.projetos import tela_projetos
-from telas.atividades import tela_alocacao
+from telas.alocacoes import tela_alocacao
 from telas.dependencias import tela_dependencias
 from telas.gantt import tela_gantt
 
@@ -27,7 +27,7 @@ def projetos():
     tela_projetos()
 
 
-@ui.page('/atividades')
+@ui.page('/alocacoes')
 def atividades():
     tela_alocacao()
 

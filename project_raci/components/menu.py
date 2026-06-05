@@ -34,9 +34,9 @@ def menu_lateral():
         ).props('flat color=white')
 
         ui.button(
-            'Atividades',
+            'Alocações',
             icon='task',
-            on_click=lambda: ui.navigate.to('/atividades')
+            on_click=lambda: ui.navigate.to('/alocacoes')
         ).props('flat color=white')
 
         ui.button(
