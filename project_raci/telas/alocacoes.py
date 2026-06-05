@@ -9,8 +9,12 @@ from crud import (
     listar_legenda_raci,
     listar_areas,
     listar_etapas,
+    listar_atividades,
     listar_atividades_por_etapa,
+    buscar_atividade,
     criar_alocacao,
+    excluir_alocacao,
+    atualizar_alocacao,
 )
 
 
@@ -20,6 +24,7 @@ def tela_alocacao():
     etapas = listar_etapas()
     raci = listar_legenda_raci()
     areas = listar_areas()
+    atividades = listar_atividades()
 
     projeto_opt = {
         p["id_projeto"]: p["projeto"]
@@ -41,6 +46,11 @@ def tela_alocacao():
         for a in areas
     }
 
+    todas_atividades = {
+        a["id_atividade"]: a["atividade"]
+        for a in atividades
+    }
+
     projeto = None
     etapa = None
     atividade = None
@@ -58,21 +68,54 @@ def tela_alocacao():
         def carregar_atividades():
 
             if not etapa.value:
-                atividade.options = {}
-                atividade.value = None
+
+                atividade.options = todas_atividades
                 atividade.update()
+
                 return
 
-            atividades = listar_atividades_por_etapa(
+            atividades_filtradas = listar_atividades_por_etapa(
                 etapa.value
             )
 
             atividade.options = {
                 a["id_atividade"]: a["atividade"]
-                for a in atividades
+                for a in atividades_filtradas
             }
 
             atividade.value = None
+            atividade.update()
+
+        def carregar_etapa():
+
+            if not atividade.value:
+
+                etapa.value = None
+                etapa.update()
+
+                return
+
+            dados_atividade = buscar_atividade(
+                atividade.value
+            )
+
+            if not dados_atividade:
+                return
+
+            etapa.value = dados_atividade["id_etapa"]
+
+            atividades_filtradas = listar_atividades_por_etapa(
+                dados_atividade["id_etapa"]
+            )
+
+            atividade.options = {
+                a["id_atividade"]: a["atividade"]
+                for a in atividades_filtradas
+            }
+
+            atividade.value = dados_atividade["id_atividade"]
+
+            etapa.update()
             atividade.update()
 
         with ui.column().classes("w-full gap-4"):
@@ -87,13 +130,19 @@ def tela_alocacao():
                 etapa = ui.select(
                     etapa_opt,
                     label="Etapa",
-                    on_change=carregar_atividades
-                ).props("outlined").classes("w-36")
+                    on_change=carregar_atividades,
+                ).props("outlined").classes("w-48")
 
                 atividade = ui.select(
-                    {},
-                    label="Atividade"
+                    todas_atividades,
+                    label="Atividade",
+                    on_change=lambda: carregar_etapa(),
                 ).props("outlined").classes("w-96")
+
+                atividade.on(
+                    "update:model-value",
+                    lambda _: carregar_etapa()
+                )
 
             with ui.row().classes("w-full gap-4"):
 
@@ -106,8 +155,6 @@ def tela_alocacao():
                     raci_opt,
                     label="RACI"
                 ).props("outlined").classes("w-48")
-
-
 
     def obter_form():
 
@@ -130,6 +177,26 @@ def tela_alocacao():
             if campo:
                 campo.value = None
 
+    def preencher_form(row):
+
+        projeto.value = row["id_projeto"]
+
+        etapa.value = row["id_etapa"]
+
+        atividades_filtradas = listar_atividades_por_etapa(
+            row["id_etapa"]
+        )
+
+        atividade.options = {
+            a["id_atividade"]: a["atividade"]
+            for a in atividades_filtradas
+        }
+
+        atividade.value = row["id_atividade"]
+
+        raci_sel.value = row["id_raci"]
+        area.value = row["id_area"]
+
     columns = [
         {
             "name": "projeto",
@@ -142,9 +209,9 @@ def tela_alocacao():
             "field": "atividade",
         },
         {
-            "name": "legenda_raci",
+            "name": "desc_raci",
             "label": "RACI",
-            "field": "legenda_raci",
+            "field": "desc_raci",
         },
         {
             "name": "area",
@@ -161,8 +228,16 @@ def tela_alocacao():
             columns=columns,
             listar_func=listar_alocacoes,
             salvar_func=criar_alocacao,
+            atualizar_func=atualizar_alocacao,
+            excluir_func=excluir_alocacao,
+            preencher_form=preencher_form,
             form_builder=form_builder,
             obter_form=obter_form,
             limpar_form=limpar_form,
-            id_field=None,
+            key_fields=[
+                "id_projeto",
+                "id_atividade",
+                "id_raci",
+                "id_area",
+            ],
         )

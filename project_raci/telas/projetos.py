@@ -92,5 +92,5 @@ def tela_projetos():
             obter_form=obter_form,
             preencher_form=preencher_form,
             limpar_form=limpar_form,
-            id_field="id_projeto",
+            key_fields=["id_responsavel"],
         )

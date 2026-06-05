@@ -12,7 +12,6 @@ from crud import (
 
 
 def tela_responsaveis():
-
     areas = listar_areas()
 
     area_options = {
@@ -25,13 +24,14 @@ def tela_responsaveis():
 
     def form():
         nonlocal nome, area
+        with ui.row().classes("w-full gap-4"):
 
-        nome = ui.input("Nome").props("outlined").classes("flex-grow")
+            nome = ui.input("Nome").props("outlined").classes("flex-grow")
 
-        area = ui.select(
+            area = ui.select(
             area_options,
             label="Área"
-        ).props("outlined").classes("w-64")
+            ).props("outlined").classes("w-32")
 
     def obter():
         return [
@@ -51,7 +51,7 @@ def tela_responsaveis():
 
         crud_page(
             titulo="Responsáveis",
-            subtitulo="Cadastro de responsáveis",
+            subtitulo="Cadastro de pontos focais por áreas",
             columns=[
                 {"name": "id_responsavel", "label": "ID", "field": "id_responsavel"},
                 {"name": "responsavel", "label": "Responsável", "field": "responsavel"},
@@ -65,5 +65,5 @@ def tela_responsaveis():
             obter_form=obter,
             preencher_form=preencher,
             limpar_form=limpar,
-            id_field="id_responsavel",
+            key_fields=["id_responsavel"],
         )

@@ -1,6 +1,5 @@
 from db import get_connection
 
-
 def listar_alocacoes():
 
     conn = get_connection()
@@ -12,9 +11,10 @@ def listar_alocacoes():
 
             a.id_atividade,
             at.atividade,
+            at.id_etapa,
 
             a.id_raci,
-            l.legenda_raci,
+            l.desc_raci,
 
             a.id_area,
             ar.area
@@ -33,21 +33,21 @@ def listar_alocacoes():
         JOIN tb_area ar
             ON ar.id_area = a.id_area
 
-        ORDER BY p.projeto, at.atividade
+        ORDER BY
+            p.projeto,
+            at.atividade
     """).fetchall()
 
     conn.close()
 
     return rows
 
-
 def criar_alocacao(
     id_projeto,
     id_atividade,
     id_raci,
-    id_area
+    id_area,
 ):
-
     conn = get_connection()
 
     conn.execute("""
@@ -62,28 +62,72 @@ def criar_alocacao(
         id_projeto,
         id_atividade,
         id_raci,
-        id_area
+        id_area,
     ))
 
     conn.commit()
     conn.close()
 
-
 def excluir_alocacao(
     id_projeto,
-    id_atividade
+    id_atividade,
+    id_raci,
+    id_area,
 ):
-
     conn = get_connection()
 
     conn.execute("""
         DELETE FROM tb_alocacao
         WHERE id_projeto = ?
           AND id_atividade = ?
+          AND id_raci = ?
+          AND id_area = ?
     """, (
         id_projeto,
-        id_atividade
+        id_atividade,
+        id_raci,
+        id_area,
     ))
 
     conn.commit()
     conn.close()
+
+def atualizar_alocacao(
+    old_id_projeto,
+    old_id_atividade,
+    old_id_raci,
+    old_id_area,
+
+    id_projeto,
+    id_atividade,
+    id_raci,
+    id_area,
+):
+    conn = get_connection()
+
+    conn.execute("""
+        UPDATE tb_alocacao
+        SET
+            id_projeto = ?,
+            id_atividade = ?,
+            id_raci = ?,
+            id_area = ?
+        WHERE id_projeto = ?
+          AND id_atividade = ?
+          AND id_raci = ?
+          AND id_area = ?
+    """, (
+        id_projeto,
+        id_atividade,
+        id_raci,
+        id_area,
+
+        old_id_projeto,
+        old_id_atividade,
+        old_id_raci,
+        old_id_area,
+    ))
+
+    conn.commit()
+    conn.close()
+

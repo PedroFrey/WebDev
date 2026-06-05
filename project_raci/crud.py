@@ -9,3 +9,5 @@ from repositories.alocacao_repository import *
 from repositories.atividade_repository import *
 
 from repositories.status_repository import *
+
+from repositories.duracao_repository import *

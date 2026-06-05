@@ -22,7 +22,7 @@ def menu_lateral():
         ).props('flat color=white')
 
         ui.button(
-            'Responsáveis',
+            'Responsáveis (Focais)',
             icon='people',
             on_click=lambda: ui.navigate.to('/responsaveis')
         ).props('flat color=white')
