@@ -7,3 +7,5 @@ open de database
 sqlite3 database.db
 4)
 Ctrl K Ctrl 0 for colapse functions
+5) run main
+/home/codespace/.python/current/bin/python /workspaces/WebDev/project_raci/main.py

@@ -25,6 +25,10 @@ def crud_page(
 
     dados_originais = []
 
+    ultimo_texto_busca = {
+        "value": ""
+    }
+
     def atualizar_tabela():
 
         nonlocal dados_originais
@@ -41,7 +45,7 @@ def crud_page(
         filtro = busca.value or ""
         filtro = filtro.strip().lower()
 
-        if not filtro:
+        if filtro == "":
 
             tabela.rows = dados_originais
             tabela.update()
@@ -51,17 +55,32 @@ def crud_page(
 
         for row in dados_originais:
 
-            encontrou = any(
-                filtro in str(valor).lower()
-                for valor in row.values()
-                if valor is not None
-            )
+            encontrou = False
+
+            for valor in row.values():
+
+                if valor is None:
+                    continue
+
+                if filtro in str(valor).lower():
+                    encontrou = True
+                    break
 
             if encontrou:
                 linhas_filtradas.append(row)
 
         tabela.rows = linhas_filtradas
         tabela.update()
+
+    def monitorar_busca():
+
+        texto_atual = busca.value or ""
+
+        if texto_atual != ultimo_texto_busca["value"]:
+
+            ultimo_texto_busca["value"] = texto_atual
+
+            aplicar_filtro()
 
     def salvar():
 
@@ -222,11 +241,6 @@ def crud_page(
                 "w-full mb-4"
             )
 
-            busca.on(
-                "update:model-value",
-                lambda _: aplicar_filtro()
-            )
-
             tabela = ui.table(
                 columns=columns,
                 rows=[],
@@ -235,6 +249,11 @@ def crud_page(
                 pagination=10,
             ).classes(
                 "w-full"
+            )
+
+            ui.timer(
+                0.2,
+                monitorar_busca
             )
 
             atualizar_tabela()

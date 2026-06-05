@@ -11,3 +11,5 @@ from repositories.atividade_repository import *
 from repositories.status_repository import *
 
 from repositories.duracao_repository import *
+
+from repositories.dependencia_repository import *
