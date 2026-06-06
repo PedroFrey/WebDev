@@ -1,11 +1,20 @@
 from nicegui import ui
 
+drawer = None
+
+def alternar_menu():
+    drawer.toggle()
+
 
 def menu_lateral():
 
-    with ui.left_drawer().classes(
+    global drawer
+
+    with ui.left_drawer(
+        value=True
+    ).classes(
         'bg-slate-800 text-white'
-    ):
+    ) as drawer:
 
         ui.label(
             'PROJETO RACI'

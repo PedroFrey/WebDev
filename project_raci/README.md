@@ -445,4 +445,3 @@ Possíveis melhorias:
 
 Projeto desenvolvido para gestão de projetos baseada em RACI utilizando Python, NiceGUI e SQLite.
 
-Esse README já está estruturado para ser colocado diretamente no `README.md` do repositório.
