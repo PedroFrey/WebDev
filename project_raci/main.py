@@ -53,12 +53,12 @@ def gantt():
     tela_gantt()
 
 # Configuração da aplicação
-ui.run(
-    title=APP_CONFIG["title"],
-    favicon=APP_CONFIG["favicon"],
-    dark=APP_CONFIG["dark_mode"],
-    storage_secret=APP_CONFIG["storage_secret"],
-    reload=True,
-    port=8080,
-    host="0.0.0.0"
-)
+if __name__ in {"__main__", "__mp_main__"}:
+    ui.run(
+        title=APP_CONFIG["title"],
+        favicon=APP_CONFIG["favicon"],
+        dark=APP_CONFIG["dark_mode"],
+        host='0.0.0.0',
+        port=8080,
+        reload=False
+    )

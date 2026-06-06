@@ -1,4 +1,4 @@
-nicegui
+nicegui>=1.4.0
 sqlalchemy
 pandas
 duckdb
