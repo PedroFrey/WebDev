@@ -177,7 +177,7 @@ def crud_page(
         )
 
     with ui.column().classes(
-        "w-full items-center bg-slate-100 min-h-screen p-8"
+        "w-full items-center min-h-screen p-8"
     ):
 
         ui.label(titulo).classes(
