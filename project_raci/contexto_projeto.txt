@@ -1,0 +1,2593 @@
+
+=== ./crud.py ===
+
+from repositories.lookups import *
+
+from repositories.projeto_repository import *
+
+from repositories.responsavel_repository import *
+
+from repositories.alocacao_repository import *
+
+from repositories.atividade_repository import *
+
+from repositories.status_repository import *
+
+from repositories.duracao_repository import *
+
+from repositories.dependencia_repository import *
+=== ./db.py ===
+
+import sqlite3
+import os
+
+DB_PATH = "/workspaces/WebDev/project_raci/database.db"
+
+SEED_FILES = [
+    "sql/seed_etapas.sql",
+    "sql/seed_legenda_raci.sql",
+    "sql/seed_area.sql",
+    "sql/seed_business_unit.sql",
+    "sql/seed_atividade.sql",
+]
+
+
+def get_connection():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+def create_database():
+    conn = get_connection()
+
+    with open("sql/create_tables.sql", encoding="utf-8") as f:
+        conn.executescript(f.read())
+
+    for file in SEED_FILES:
+        with open(file, encoding="utf-8") as f:
+            conn.executescript(f.read())
+
+    conn.commit()
+    conn.close()
+=== ./sql/seed_atividade.sql ===
+
+INSERT OR IGNORE INTO tb_atividade
+(id_atividade,id_etapa,atividade)
+VALUES
+(1,1,'Definição dos objetivos do programa sob a ótica de marca e conteúdo'),
+(2,1,'Decupagem e compatibilização de entregáveis (creators, dados, etc)'),
+(3,1,'Desenho do crivo técnico e LGPD (regulamentações, CRO, etc)'),
+(4,1,'Compatibilização de budget e proposta'),
+
+(5,2,'Definição de papéis & responsabilidades (RACI)'),
+(6,2,'Detalhamento e validação interna do cronograma macro'),
+(7,2,'Apresentação/proposta consolidada'),
+(8,2,'Análise e Aprovação da proposta (cliente)'),
+(9,2,'Pré-select de Perfis V1 (c/Crivo técnico dos perfis, disaster-check, regulamentações, CRO, etc)'),
+(10,2,'Aprovação/Devolutiva Perfis V1'),
+
+(11,3,'Pré-select de Perfis V2 (c/Crivo técnico dos perfis, disaster-check, regulamentações, CRO, etc)'),
+(12,3,'Aprovação/Devolutiva Perfis V2 (final)'),
+(13,3,'Definição de formatos e volumetria de conteúdos'),
+(14,3,'Definição das editorias e pautas das aulas'),
+(15,3,'Onboarding de marca (envio do brandbook, do''s & don''ts de marca, etc)'),
+(16,3,'Desenho e validação da jornada educacional'),
+(17,3,'Criação, produção, edição e aprovação do curso e LP'),
+(18,3,'Planejamento e orçamento | Welcome meeting Híbrido'),
+(19,3,'Produção Welcome meeting | kits, palestras, agenda, etc'),
+
+(20,4,'Liberação de acessos, onboarding e testes da ferramenta (dash HD)'),
+(21,4,'Liberação de acessos, onboarding e testes da ferramenta (LP aulas)'),
+(22,4,'Testes Ferramentas (Dash HD e LP aulas)'),
+(23,4,'Welcome meeting (híbrido)'),
+
+(24,5,'Kickoff do programa (início da jornada de aulas)'),
+(25,5,'Produção dos primeiros conteúdos de Social'),
+(26,5,'Aprovação e publicação dos conteúdos de Social'),
+(27,5,'Execução da jornada educacional'),
+(28,5,'Monitoramento de adesão e performance (aulas)'),
+(29,5,'Gestão contínua do programa de ensino'),
+(30,5,'Mensuração e Report dos primeiros resultados e insights'),
+
+(31,6,'Tracking adesão Squad Perfis aprovados'),
+(32,6,'Substituição (se necessário) com novos perfis'),
+(33,6,'Newsletter periódica com bignumbers para acompanhamento'),
+(34,6,'Onboarding de marca, plataformas e envio de kits aos novos perfis (se necessário substituição)');
+=== ./sql/create_tables.sql ===
+
+CREATE TABLE IF NOT EXISTS tb_etapa (
+    id_etapa INTEGER PRIMARY KEY,
+    etapa TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS tb_atividade (
+    id_atividade INTEGER PRIMARY KEY,
+    id_etapa INTEGER NOT NULL,
+    atividade TEXT NOT NULL,
+
+    FOREIGN KEY (id_etapa)
+        REFERENCES tb_etapa(id_etapa)
+);
+
+CREATE TABLE IF NOT EXISTS tb_business_unit (
+    cliente_id INTEGER PRIMARY KEY,
+    cliente TEXT NOT NULL,
+    bu TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS tb_area (
+    id_area INTEGER PRIMARY KEY,
+    area TEXT NOT NULL,
+    empresa TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS tb_projeto (
+    id_projeto INTEGER PRIMARY KEY,
+    cliente_id INTEGER NOT NULL,
+    projeto TEXT NOT NULL,
+
+    FOREIGN KEY (cliente_id)
+        REFERENCES tb_business_unit(cliente_id)
+);
+
+CREATE TABLE IF NOT EXISTS tb_legenda_raci (
+    id_raci INTEGER PRIMARY KEY,
+    legenda_raci TEXT NOT NULL,
+    desc_raci TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS tb_responsavel (
+    id_responsavel INTEGER PRIMARY KEY,
+    id_area INTEGER NOT NULL,
+    responsavel TEXT NOT NULL,
+
+    FOREIGN KEY (id_area)
+        REFERENCES tb_area(id_area)
+);
+
+CREATE TABLE IF NOT EXISTS tb_dependencias (
+    id_atividade_pai INTEGER NOT NULL,
+    id_atividade_filho INTEGER NOT NULL,
+
+    PRIMARY KEY (
+        id_atividade_pai,
+        id_atividade_filho
+    ),
+
+    FOREIGN KEY (id_atividade_pai)
+        REFERENCES tb_atividade(id_atividade),
+
+    FOREIGN KEY (id_atividade_filho)
+        REFERENCES tb_atividade(id_atividade)
+);
+
+CREATE TABLE IF NOT EXISTS tb_duracao (
+    id_projeto INTEGER NOT NULL,
+    id_atividade INTEGER NOT NULL,
+    duracao INTEGER NOT NULL,
+
+    PRIMARY KEY (
+        id_projeto,
+        id_atividade
+    ),
+
+    FOREIGN KEY (id_projeto)
+        REFERENCES tb_projeto(id_projeto),
+
+    FOREIGN KEY (id_atividade)
+        REFERENCES tb_atividade(id_atividade)
+);
+
+CREATE TABLE IF NOT EXISTS tb_status (
+    id_projeto INTEGER NOT NULL,
+    id_atividade INTEGER NOT NULL,
+
+    dt_inicio_real DATE,
+    dt_inicio_previsto DATE,
+    dt_fim_real DATE,
+    dt_fim_previsto DATE,
+
+    PRIMARY KEY (
+        id_projeto,
+        id_atividade
+    ),
+
+    FOREIGN KEY (id_projeto)
+        REFERENCES tb_projeto(id_projeto),
+
+    FOREIGN KEY (id_atividade)
+        REFERENCES tb_atividade(id_atividade)
+);
+
+CREATE TABLE IF NOT EXISTS tb_alocacao (
+    id_projeto INTEGER NOT NULL,
+    id_atividade INTEGER NOT NULL,
+    id_raci INTEGER NOT NULL,
+    id_area INTEGER NOT NULL,
+
+    PRIMARY KEY (
+        id_projeto,
+        id_atividade,
+        id_raci
+    ),
+
+    FOREIGN KEY (id_projeto)
+        REFERENCES tb_projeto(id_projeto),
+
+    FOREIGN KEY (id_atividade)
+        REFERENCES tb_atividade(id_atividade),
+
+    FOREIGN KEY (id_raci)
+        REFERENCES tb_legenda_raci(id_raci),
+
+    FOREIGN KEY (id_area)
+        REFERENCES tb_area(id_area)
+);
+=== ./sql/seed_business_unit.sql ===
+
+INSERT OR IGNORE INTO tb_business_unit
+(cliente_id, cliente, bu)
+VALUES
+(1,'Opella','BU-04'),
+(2,'RD Saude','BU-04'),
+(3,'Vivo','BU-04'),
+(4,'Renner','BU-04'),
+(5,'Nivea','BU-04'),
+(6,'Eucerin','BU-04'),
+(7,'Banco do Brasil','BU-04'),
+(8,'Nu','BU-06'),
+(9,'Unilever','BU-06');
+=== ./sql/seed_legenda_raci.sql ===
+
+INSERT OR IGNORE INTO tb_legenda_raci
+VALUES
+(1,'R','Responsável'),
+(2,'A','Aprovador'),
+(3,'C','Consultado'),
+(4,'I','Informado'),
+(5,'NA','Não envolvido');
+=== ./sql/seed_etapas.sql ===
+
+INSERT OR IGNORE INTO tb_etapa
+VALUES
+(1,'Deep Dive'),
+(2,'Governança'),
+(3,'Set-up'),
+(4,'Warm-up'),
+(5,'Go-live'),
+(6,'Manutenção');
+=== ./sql/seed_all.sql ===
+
+.read seed_etapa.sql
+.read seed_legenda_raci.sql
+.read seed_area.sql
+.read seed_business_unit.sql
+.read seed_atividade.sql
+=== ./sql/seed_area.sql ===
+
+INSERT OR IGNORE INTO tb_area
+(id_area, area, empresa)
+VALUES
+(1,'Atendimento','Spark'),
+(2,'Operações','Spark'),
+(3,'Estratégia','Spark'),
+(4,'Criação','Spark'),
+(5,'Channels','Spark'),
+(6,'Human Data','Spark'),
+(7,'IB','Spark'),
+(8,'Data Strategy','Spark'),
+(9,'Produção','Spark'),
+(10,'Creator','Spark'),
+(11,'YouPix','YouPIX');
+=== ./repositories/atividade_repository.py ===
+
+from db import get_connection
+
+
+def listar_atividades_por_etapa(id_etapa):
+
+    conn = get_connection()
+
+    rows = conn.execute("""
+        SELECT
+            id_atividade,
+            atividade
+        FROM tb_atividade
+        WHERE id_etapa = ?
+        ORDER BY atividade
+    """, (id_etapa,)).fetchall()
+
+    conn.close()
+
+    return rows
+
+def buscar_atividade(id_atividade):
+
+    conn = get_connection()
+
+    row = conn.execute("""
+        SELECT
+            id_atividade,
+            atividade,
+            id_etapa
+        FROM tb_atividade
+        WHERE id_atividade = ?
+    """, (id_atividade,)).fetchone()
+
+    conn.close()
+
+    return row
+=== ./repositories/projeto_repository.py ===
+
+from db import get_connection
+
+
+def listar_projetos():
+
+    conn = get_connection()
+
+    rows = conn.execute("""
+        SELECT
+            p.id_projeto,
+            p.projeto,
+            b.cliente
+        FROM tb_projeto p
+        JOIN tb_business_unit b
+            ON p.cliente_id = b.cliente_id
+        ORDER BY p.projeto
+    """).fetchall()
+
+    conn.close()
+
+    return rows
+
+
+def criar_projeto(cliente_id, projeto):
+
+    conn = get_connection()
+
+    conn.execute("""
+        INSERT INTO tb_projeto
+        (cliente_id, projeto)
+        VALUES (?, ?)
+    """, (
+        cliente_id,
+        projeto
+    ))
+
+    conn.commit()
+    conn.close()
+
+
+def atualizar_projeto(
+    id_projeto,
+    cliente_id,
+    projeto
+):
+
+    conn = get_connection()
+
+    conn.execute("""
+        UPDATE tb_projeto
+        SET
+            cliente_id = ?,
+            projeto = ?
+        WHERE id_projeto = ?
+    """, (
+        cliente_id,
+        projeto,
+        id_projeto
+    ))
+
+    conn.commit()
+    conn.close()
+
+
+def excluir_projeto(id_projeto):
+
+    conn = get_connection()
+
+    conn.execute("""
+        DELETE FROM tb_projeto
+        WHERE id_projeto = ?
+    """, (id_projeto,))
+
+    conn.commit()
+    conn.close()
+
+=== ./repositories/alocacao_repository.py ===
+
+from db import get_connection
+
+def listar_alocacoes():
+
+    conn = get_connection()
+
+    rows = conn.execute("""
+        SELECT
+            a.id_projeto,
+            p.projeto,
+
+            a.id_atividade,
+            at.atividade,
+            at.id_etapa,
+
+            a.id_raci,
+            l.desc_raci,
+
+            a.id_area,
+            ar.area
+
+        FROM tb_alocacao a
+
+        JOIN tb_projeto p
+            ON p.id_projeto = a.id_projeto
+
+        JOIN tb_atividade at
+            ON at.id_atividade = a.id_atividade
+
+        JOIN tb_legenda_raci l
+            ON l.id_raci = a.id_raci
+
+        JOIN tb_area ar
+            ON ar.id_area = a.id_area
+
+        ORDER BY
+            p.projeto,
+            at.atividade
+    """).fetchall()
+
+    conn.close()
+
+    return rows
+
+def criar_alocacao(
+    id_projeto,
+    id_atividade,
+    id_raci,
+    id_area,
+):
+    conn = get_connection()
+
+    conn.execute("""
+        INSERT INTO tb_alocacao (
+            id_projeto,
+            id_atividade,
+            id_raci,
+            id_area
+        )
+        VALUES (?, ?, ?, ?)
+    """, (
+        id_projeto,
+        id_atividade,
+        id_raci,
+        id_area,
+    ))
+
+    conn.commit()
+    conn.close()
+
+def excluir_alocacao(
+    id_projeto,
+    id_atividade,
+    id_raci,
+    id_area,
+):
+    conn = get_connection()
+
+    conn.execute("""
+        DELETE FROM tb_alocacao
+        WHERE id_projeto = ?
+          AND id_atividade = ?
+          AND id_raci = ?
+          AND id_area = ?
+    """, (
+        id_projeto,
+        id_atividade,
+        id_raci,
+        id_area,
+    ))
+
+    conn.commit()
+    conn.close()
+
+def atualizar_alocacao(
+    old_id_projeto,
+    old_id_atividade,
+    old_id_raci,
+    old_id_area,
+
+    id_projeto,
+    id_atividade,
+    id_raci,
+    id_area,
+):
+    conn = get_connection()
+
+    conn.execute("""
+        UPDATE tb_alocacao
+        SET
+            id_projeto = ?,
+            id_atividade = ?,
+            id_raci = ?,
+            id_area = ?
+        WHERE id_projeto = ?
+          AND id_atividade = ?
+          AND id_raci = ?
+          AND id_area = ?
+    """, (
+        id_projeto,
+        id_atividade,
+        id_raci,
+        id_area,
+
+        old_id_projeto,
+        old_id_atividade,
+        old_id_raci,
+        old_id_area,
+    ))
+
+    conn.commit()
+    conn.close()
+
+
+=== ./repositories/responsavel_repository.py ===
+
+from db import get_connection
+
+
+def listar_responsaveis():
+
+    conn = get_connection()
+
+    rows = conn.execute("""
+        SELECT
+            r.id_responsavel,
+            r.responsavel,
+            r.id_area,
+            a.area
+        FROM tb_responsavel r
+        JOIN tb_area a
+            ON r.id_area = a.id_area
+        ORDER BY r.responsavel
+    """).fetchall()
+
+    conn.close()
+
+    return rows
+
+
+def criar_responsavel(nome, id_area):
+
+    conn = get_connection()
+
+    conn.execute("""
+        INSERT INTO tb_responsavel
+        (id_area, responsavel)
+        VALUES (?, ?)
+    """, (
+        id_area,
+        nome
+    ))
+
+    conn.commit()
+    conn.close()
+
+
+def atualizar_responsavel(
+    id_responsavel,
+    nome,
+    id_area
+):
+
+    conn = get_connection()
+
+    conn.execute("""
+        UPDATE tb_responsavel
+        SET
+            responsavel = ?,
+            id_area = ?
+        WHERE id_responsavel = ?
+    """, (
+        nome,
+        id_area,
+        id_responsavel
+    ))
+
+    conn.commit()
+    conn.close()
+
+
+def excluir_responsavel(id_responsavel):
+
+    conn = get_connection()
+
+    conn.execute("""
+        DELETE FROM tb_responsavel
+        WHERE id_responsavel = ?
+    """, (id_responsavel,))
+
+    conn.commit()
+    conn.close()
+
+=== ./repositories/dependencia_repository.py ===
+
+from db import get_connection
+
+
+def listar_dependencias():
+
+    conn = get_connection()
+
+    rows = conn.execute("""
+        SELECT
+            d.id_atividade_pai,
+            pai.atividade AS atividade_pai,
+
+            d.id_atividade_filho,
+            filho.atividade AS atividade_filho
+
+        FROM tb_dependencias d
+
+        JOIN tb_atividade pai
+            ON pai.id_atividade = d.id_atividade_pai
+
+        JOIN tb_atividade filho
+            ON filho.id_atividade = d.id_atividade_filho
+
+        ORDER BY
+            pai.atividade,
+            filho.atividade
+    """).fetchall()
+
+    conn.close()
+
+    return rows
+
+
+def listar_dependencias_atividade(
+    id_atividade
+):
+
+    conn = get_connection()
+
+    rows = conn.execute("""
+        SELECT
+            id_atividade_pai,
+            id_atividade_filho
+        FROM tb_dependencias
+        WHERE id_atividade_pai = ?
+           OR id_atividade_filho = ?
+    """, (
+        id_atividade,
+        id_atividade,
+    )).fetchall()
+
+    conn.close()
+
+    return rows
+
+
+def criar_dependencia(
+    id_atividade_pai,
+    id_atividade_filho
+):
+
+    conn = get_connection()
+
+    conn.execute("""
+        INSERT OR IGNORE INTO tb_dependencias (
+            id_atividade_pai,
+            id_atividade_filho
+        )
+        VALUES (?, ?)
+    """, (
+        id_atividade_pai,
+        id_atividade_filho,
+    ))
+
+    conn.commit()
+    conn.close()
+
+
+def excluir_dependencia(
+    id_atividade_pai,
+    id_atividade_filho
+):
+
+    conn = get_connection()
+
+    conn.execute("""
+        DELETE FROM tb_dependencias
+        WHERE id_atividade_pai = ?
+          AND id_atividade_filho = ?
+    """, (
+        id_atividade_pai,
+        id_atividade_filho,
+    ))
+
+    conn.commit()
+    conn.close()
+
+
+def excluir_todas_dependencias_atividade(
+    id_atividade
+):
+
+    conn = get_connection()
+
+    conn.execute("""
+        DELETE FROM tb_dependencias
+        WHERE id_atividade_pai = ?
+           OR id_atividade_filho = ?
+    """, (
+        id_atividade,
+        id_atividade,
+    ))
+
+    conn.commit()
+    conn.close()
+=== ./repositories/status_repository.py ===
+
+from db import get_connection
+
+
+def listar_status():
+
+    conn = get_connection()
+
+    rows = conn.execute("""
+        SELECT
+            id_projeto,
+            id_atividade,
+            dt_inicio_real,
+            dt_inicio_previsto,
+            dt_fim_real,
+            dt_fim_previsto
+        FROM tb_status
+    """).fetchall()
+
+    conn.close()
+
+    return rows
+
+=== ./repositories/duracao_repository.py ===
+
+from db import get_connection
+
+def criar_duracao(
+    id_projeto,
+    id_atividade,
+    duracao,
+):
+    conn = get_connection()
+
+    conn.execute("""
+        INSERT INTO tb_duracao (
+            id_projeto,
+            id_atividade,
+            duracao
+        )
+        VALUES (?, ?, ?)
+    """, (
+        id_projeto,
+        id_atividade,
+        duracao,
+    ))
+
+    conn.commit()
+    conn.close()
+=== ./repositories/lookups.py ===
+
+from db import get_connection
+
+
+def listar_etapas():
+
+    conn = get_connection()
+
+    rows = conn.execute("""
+        SELECT
+            id_etapa,
+            etapa
+        FROM tb_etapa
+        ORDER BY etapa
+    """).fetchall()
+
+    conn.close()
+
+    return rows
+
+
+def listar_areas():
+
+    conn = get_connection()
+
+    rows = conn.execute("""
+        SELECT
+            id_area,
+            area
+        FROM tb_area
+        ORDER BY area
+    """).fetchall()
+
+    conn.close()
+
+    return rows
+
+
+def listar_clientes():
+
+    conn = get_connection()
+
+    rows = conn.execute("""
+        SELECT
+            cliente_id,
+            cliente
+        FROM tb_business_unit
+        ORDER BY cliente
+    """).fetchall()
+
+    conn.close()
+
+    return rows
+
+
+def listar_legenda_raci():
+
+    conn = get_connection()
+
+    rows = conn.execute("""
+        SELECT
+            id_raci,
+            legenda_raci,
+            desc_raci
+        FROM tb_legenda_raci
+        ORDER BY legenda_raci
+    """).fetchall()
+
+    conn.close()
+
+    return rows
+
+
+def listar_atividades():
+
+    conn = get_connection()
+
+    rows = conn.execute("""
+        SELECT
+            a.id_etapa,
+            a.id_atividade,
+            a.atividade,
+            e.etapa
+        FROM tb_atividade a
+        LEFT JOIN tb_etapa e
+            ON e.id_etapa = a.id_etapa
+        ORDER BY a.id_atividade
+    """).fetchall()
+
+    conn.close()
+
+    return rows
+=== ./main.py ===
+
+from nicegui import ui
+
+from db import create_database
+
+from telas.dashboard import tela_dashboard
+from telas.responsaveis import tela_responsaveis
+from telas.projetos import tela_projetos
+from telas.alocacoes import tela_alocacao
+from telas.dependencias import tela_dependencias
+from telas.gantt import tela_gantt
+
+create_database()
+
+
+@ui.page('/')
+def dashboard():
+    tela_dashboard()
+
+
+@ui.page('/responsaveis')
+def responsaveis():
+    tela_responsaveis()
+
+
+@ui.page('/projetos')
+def projetos():
+    tela_projetos()
+
+
+@ui.page('/alocacoes')
+def atividades():
+    tela_alocacao()
+
+
+@ui.page('/dependencias')
+def dependencias():
+    tela_dependencias()
+
+
+@ui.page('/gantt')
+def gantt():
+    tela_gantt()
+
+
+ui.run(
+    title='Projeto RACI',
+    reload=True
+)
+=== ./telas/responsaveis.py ===
+
+from nicegui import ui
+from components.layout import pagina
+from components.crud_template import crud_page
+
+from crud import (
+    listar_areas,
+    listar_responsaveis,
+    criar_responsavel,
+    atualizar_responsavel,
+    excluir_responsavel,
+)
+
+
+def tela_responsaveis():
+    areas = listar_areas()
+
+    area_options = {
+        a["id_area"]: a["area"]
+        for a in areas
+    }
+
+    nome = None
+    area = None
+
+    def form():
+        nonlocal nome, area
+        with ui.row().classes("w-full gap-4"):
+
+            nome = ui.input("Nome").props("outlined").classes("flex-grow")
+
+            area = ui.select(
+            area_options,
+            label="Área"
+            ).props("outlined").classes("w-32")
+
+    def obter():
+        return [
+            nome.value.strip(),
+            area.value
+        ]
+
+    def preencher(row):
+        nome.value = row["responsavel"]
+        area.value = row["id_area"]
+
+    def limpar():
+        nome.value = ""
+        area.value = None
+
+    with pagina("Responsáveis"):
+
+        crud_page(
+            titulo="Responsáveis",
+            subtitulo="Cadastro de pontos focais por áreas",
+            columns=[
+                {"name": "id_responsavel", "label": "ID", "field": "id_responsavel"},
+                {"name": "responsavel", "label": "Responsável", "field": "responsavel"},
+                {"name": "area", "label": "Área", "field": "area"},
+            ],
+            listar_func=listar_responsaveis,
+            salvar_func=criar_responsavel,
+            atualizar_func=atualizar_responsavel,
+            excluir_func=excluir_responsavel,
+            form_builder=form,
+            obter_form=obter,
+            preencher_form=preencher,
+            limpar_form=limpar,
+            key_fields=["id_responsavel"],
+        )
+=== ./telas/projetos.py ===
+
+from nicegui import ui
+
+from components.layout import pagina
+from components.crud_template import crud_page
+
+from crud import (
+    listar_projetos,
+    listar_clientes,
+    criar_projeto,
+    atualizar_projeto,
+    excluir_projeto,
+)
+
+
+def tela_projetos():
+
+    clientes = listar_clientes()
+
+    cliente_options = {
+        c["cliente_id"]: c["cliente"]
+        for c in clientes
+    }
+
+    nome = None
+    cliente = None
+
+    def form_builder():
+        nonlocal nome, cliente
+
+        with ui.row().classes("w-full gap-4 items-end"):
+
+            nome = ui.input("Nome do Projeto") \
+                .props("outlined") \
+                .classes("flex-grow")
+
+            cliente = ui.select(
+                cliente_options,
+                label="Cliente",
+            ).props("outlined").classes("w-64")
+
+    def obter_form():
+        return [
+            cliente.value,
+            nome.value.strip(),
+        ]
+
+    def preencher_form(row):
+        nome.value = row["projeto"]
+
+        # precisa converter cliente nome → id
+        for c in clientes:
+            if c["cliente"] == row["cliente"]:
+                cliente.value = c["cliente_id"]
+                break
+
+    def limpar_form():
+        nome.value = ""
+        cliente.value = None
+
+    columns = [
+        {
+            "name": "id_projeto",
+            "label": "ID",
+            "field": "id_projeto",
+            "align": "left",
+        },
+        {
+            "name": "projeto",
+            "label": "Projeto",
+            "field": "projeto",
+            "align": "left",
+        },
+        {
+            "name": "cliente",
+            "label": "Cliente",
+            "field": "cliente",
+            "align": "left",
+        },
+    ]
+
+    with pagina("Projetos"):
+
+        crud_page(
+            titulo="Projetos",
+            subtitulo="Cadastro de projetos",
+            columns=columns,
+            listar_func=listar_projetos,
+            salvar_func=criar_projeto,
+            atualizar_func=atualizar_projeto,
+            excluir_func=excluir_projeto,
+            form_builder=form_builder,
+            obter_form=obter_form,
+            preencher_form=preencher_form,
+            limpar_form=limpar_form,
+            key_fields=["id_responsavel"],
+        )
+=== ./telas/alocacoes.py ===
+
+from nicegui import ui
+
+from components.layout import pagina
+from components.crud_template import crud_page
+
+from crud import (
+    listar_alocacoes,
+    listar_projetos,
+    listar_legenda_raci,
+    listar_areas,
+    listar_etapas,
+    listar_atividades,
+    listar_atividades_por_etapa,
+    buscar_atividade,
+    criar_alocacao,
+    excluir_alocacao,
+    atualizar_alocacao,
+)
+
+
+def tela_alocacao():
+
+    projetos = listar_projetos()
+    etapas = listar_etapas()
+    raci = listar_legenda_raci()
+    areas = listar_areas()
+    atividades = listar_atividades()
+
+    projeto_opt = {
+        p["id_projeto"]: p["projeto"]
+        for p in projetos
+    }
+
+    etapa_opt = {
+        e["id_etapa"]: e["etapa"]
+        for e in etapas
+    }
+
+    raci_opt = {
+        r["id_raci"]: r["desc_raci"]
+        for r in raci
+    }
+
+    area_opt = {
+        a["id_area"]: a["area"]
+        for a in areas
+    }
+
+    todas_atividades = {
+        a["id_atividade"]: a["atividade"]
+        for a in atividades
+    }
+
+    projeto = None
+    etapa = None
+    atividade = None
+    raci_sel = None
+    area = None
+
+    def form_builder():
+
+        nonlocal projeto
+        nonlocal etapa
+        nonlocal atividade
+        nonlocal raci_sel
+        nonlocal area
+
+        def carregar_atividades():
+
+            if not etapa.value:
+
+                atividade.options = todas_atividades
+                atividade.update()
+
+                return
+
+            atividades_filtradas = listar_atividades_por_etapa(
+                etapa.value
+            )
+
+            atividade.options = {
+                a["id_atividade"]: a["atividade"]
+                for a in atividades_filtradas
+            }
+
+            atividade.value = None
+            atividade.update()
+
+        def carregar_etapa():
+
+            if not atividade.value:
+
+                etapa.value = None
+                etapa.update()
+
+                return
+
+            dados_atividade = buscar_atividade(
+                atividade.value
+            )
+
+            if not dados_atividade:
+                return
+
+            etapa.value = dados_atividade["id_etapa"]
+
+            atividades_filtradas = listar_atividades_por_etapa(
+                dados_atividade["id_etapa"]
+            )
+
+            atividade.options = {
+                a["id_atividade"]: a["atividade"]
+                for a in atividades_filtradas
+            }
+
+            atividade.value = dados_atividade["id_atividade"]
+
+            etapa.update()
+            atividade.update()
+
+        with ui.column().classes("w-full gap-4"):
+
+            with ui.row().classes("w-full gap-4"):
+
+                projeto = ui.select(
+                    projeto_opt,
+                    label="Projeto"
+                ).props("outlined").classes("w-72")
+
+                etapa = ui.select(
+                    etapa_opt,
+                    label="Etapa",
+                    on_change=carregar_atividades,
+                ).props("outlined").classes("w-48")
+
+                atividade = ui.select(
+                    todas_atividades,
+                    label="Atividade",
+                    on_change=lambda: carregar_etapa(),
+                ).props("outlined").classes("w-96")
+
+                atividade.on(
+                    "update:model-value",
+                    lambda _: carregar_etapa()
+                )
+
+            with ui.row().classes("w-full gap-4"):
+
+                area = ui.select(
+                    area_opt,
+                    label="Área"
+                ).props("outlined").classes("w-72")
+
+                raci_sel = ui.select(
+                    raci_opt,
+                    label="RACI"
+                ).props("outlined").classes("w-48")
+
+    def obter_form():
+
+        return [
+            projeto.value,
+            atividade.value,
+            raci_sel.value,
+            area.value,
+        ]
+
+    def limpar_form():
+
+        for campo in [
+            projeto,
+            etapa,
+            atividade,
+            raci_sel,
+            area,
+        ]:
+            if campo:
+                campo.value = None
+
+    def preencher_form(row):
+
+        projeto.value = row["id_projeto"]
+
+        etapa.value = row["id_etapa"]
+
+        atividades_filtradas = listar_atividades_por_etapa(
+            row["id_etapa"]
+        )
+
+        atividade.options = {
+            a["id_atividade"]: a["atividade"]
+            for a in atividades_filtradas
+        }
+
+        atividade.value = row["id_atividade"]
+
+        raci_sel.value = row["id_raci"]
+        area.value = row["id_area"]
+
+    columns = [
+        {
+            "name": "projeto",
+            "label": "Projeto",
+            "field": "projeto",
+        },
+        {
+            "name": "atividade",
+            "label": "Atividade",
+            "field": "atividade",
+        },
+        {
+            "name": "desc_raci",
+            "label": "RACI",
+            "field": "desc_raci",
+        },
+        {
+            "name": "area",
+            "label": "Área",
+            "field": "area",
+        },
+    ]
+
+    with pagina("Alocação"):
+
+        crud_page(
+            titulo="Alocação",
+            subtitulo="RACI de projetos e atividades",
+            columns=columns,
+            listar_func=listar_alocacoes,
+            salvar_func=criar_alocacao,
+            atualizar_func=atualizar_alocacao,
+            excluir_func=excluir_alocacao,
+            preencher_form=preencher_form,
+            form_builder=form_builder,
+            obter_form=obter_form,
+            limpar_form=limpar_form,
+            key_fields=[
+                "id_projeto",
+                "id_atividade",
+                "id_raci",
+                "id_area",
+            ],
+        )
+=== ./telas/dependencias.py ===
+
+from nicegui import ui
+
+from components.layout import pagina
+
+from crud import (
+    listar_etapas,
+    listar_atividades,
+    listar_dependencias,
+    listar_dependencias_atividade,
+    criar_dependencia,
+    excluir_todas_dependencias_atividade,
+)
+
+def tela_dependencias():
+
+    etapas = [
+        dict(x)
+        for x in listar_etapas()
+    ]
+
+    atividades = [
+        dict(x)
+        for x in listar_atividades()
+    ]
+
+    etapa_filtro = None
+    atividade_focal = None
+
+    predecessoras = []
+    sucessoras = []
+
+    painel_predecessoras = ui.column()
+    painel_sucessoras = ui.column()
+    painel_disponiveis = ui.column()
+    painel_resumo = ui.column()
+
+    cores = [
+        "#ef4444",
+        "#f97316",
+        "#eab308",
+        "#22c55e",
+        "#06b6d4",
+        "#3b82f6",
+        "#8b5cf6",
+        "#ec4899",
+        "#14b8a6",
+        "#84cc16",
+    ]
+
+    cor_etapa = {}
+
+    for i, etapa in enumerate(etapas):
+        cor_etapa[
+            etapa["id_etapa"]
+        ] = cores[i % len(cores)]
+
+    def obter_atividade(id_atividade):
+
+        for atividade in atividades:
+
+            if (
+                atividade["id_atividade"]
+                == id_atividade
+            ):
+                return atividade
+
+        return None
+
+    def atualizar_resumo():
+
+        painel_resumo.clear()
+
+        dependencias = [
+            dict(x)
+            for x in listar_dependencias()
+        ]
+
+        ids_classificados = set()
+
+        for dep in dependencias:
+            ids_classificados.add(
+                dep["id_atividade_pai"]
+            )
+            ids_classificados.add(
+                dep["id_atividade_filho"]
+            )
+
+        with painel_resumo:
+
+            ui.label(
+                "Resumo Geral"
+            ).classes(
+                "text-2xl font-bold mb-4"
+            )
+
+            with ui.row().classes(
+                "w-full gap-8"
+            ):
+
+                with ui.card().classes(
+                    "w-[650px]"
+                ):
+
+                    ui.label(
+                        "Dependências Cadastradas"
+                    ).classes(
+                        "font-bold text-lg"
+                    )
+
+                    if not dependencias:
+                        ui.label(
+                            "Nenhuma dependência cadastrada"
+                        )
+
+                    for dep in dependencias:
+
+                        ui.label(
+                            f"{dep['atividade_pai']} → {dep['atividade_filho']}"
+                        )
+
+                with ui.card().classes(
+                    "w-[350px]"
+                ):
+
+                    ui.label(
+                        "Atividades Sem Dependência"
+                    ).classes(
+                        "font-bold text-lg"
+                    )
+
+                    sem_dependencia = [
+                        a
+                        for a in atividades
+                        if a["id_atividade"]
+                        not in ids_classificados
+                    ]
+
+                    if not sem_dependencia:
+                        ui.label(
+                            "Todas classificadas"
+                        )
+
+                    for atividade in sem_dependencia:
+
+                        ui.label(
+                            atividade["atividade"]
+                        )
+
+    def atualizar_telas():
+
+        painel_predecessoras.clear()
+
+        with painel_predecessoras:
+
+            if not predecessoras:
+
+                ui.label(
+                    "Nenhuma predecessora"
+                )
+
+            for atividade in predecessoras:
+
+                with ui.card().style(
+                    f"""
+                    background:{cor_etapa.get(atividade['id_etapa'], '#22c55e')};
+                    color:white;
+                    """
+                ).classes(
+                    "w-full p-1"
+                ):
+
+                    ui.label(
+                        atividade["atividade"]
+                    ).classes(
+                        "font-bold text-sm"
+                    )
+
+        painel_sucessoras.clear()
+
+        with painel_sucessoras:
+
+            if not sucessoras:
+
+                ui.label(
+                    "Nenhuma sucessora"
+                )
+
+            for atividade in sucessoras:
+
+                with ui.card().style(
+                    f"""
+                    background:{cor_etapa.get(atividade['id_etapa'], '#3b82f6')};
+                    color:white;
+                    """
+                ).classes(
+                    "w-full p-1"
+                ):
+
+                    ui.label(
+                        atividade["atividade"]
+                    ).classes(
+                        "font-bold text-sm"
+                    )
+
+        painel_disponiveis.clear()
+
+        with painel_disponiveis:
+
+            atividades_exibir = atividades
+
+            if etapa_filtro.value:
+
+                atividades_exibir = [
+                    a
+                    for a in atividades
+                    if a["id_etapa"]
+                    == etapa_filtro.value
+                ]
+
+            with ui.row().classes(
+                "w-full gap-2"
+            ):
+
+                for atividade in atividades_exibir:
+
+                    if (
+                        atividade_focal.value
+                        and atividade["id_atividade"]
+                        == atividade_focal.value
+                    ):
+                        continue
+
+                    if any(
+                        x["id_atividade"]
+                        == atividade["id_atividade"]
+                        for x in predecessoras
+                    ):
+                        continue
+
+                    if any(
+                        x["id_atividade"]
+                        == atividade["id_atividade"]
+                        for x in sucessoras
+                    ):
+                        continue
+
+                    with ui.card().style(
+                        f"""
+                        background:
+                        {cor_etapa.get(atividade['id_etapa'], '#64748b')};
+                        color:white;
+                        """
+                    ).classes(
+                        "w-[260px]"
+                    ):
+
+                        ui.label(
+                            atividade["atividade"]
+                        ).classes(
+                            "font-bold text-sm"
+                        )
+
+                        ui.label(
+                            atividade["etapa"]
+                        ).classes(
+                            "text-xs"
+                        )
+
+                        with ui.row():
+
+                            ui.button(
+                                "←",
+                                on_click=lambda e, a=atividade:
+                                adicionar_predecessora(a)
+                            )
+
+                            ui.button(
+                                "→",
+                                on_click=lambda e, a=atividade:
+                                adicionar_sucessora(a)
+                            )
+
+        atualizar_resumo()
+
+    def carregar_dependencias():
+
+        predecessoras.clear()
+        sucessoras.clear()
+
+        if not atividade_focal.value:
+
+            atualizar_telas()
+            return
+
+        deps = listar_dependencias_atividade(
+            atividade_focal.value
+        )
+
+        for dep in deps:
+
+            dep = dict(dep)
+
+            if (
+                dep["id_atividade_filho"]
+                == atividade_focal.value
+            ):
+
+                atividade = obter_atividade(
+                    dep["id_atividade_pai"]
+                )
+
+                if atividade:
+                    predecessoras.append(
+                        atividade
+                    )
+
+            elif (
+                dep["id_atividade_pai"]
+                == atividade_focal.value
+            ):
+
+                atividade = obter_atividade(
+                    dep["id_atividade_filho"]
+                )
+
+                if atividade:
+                    sucessoras.append(
+                        atividade
+                    )
+
+        atualizar_telas()
+
+    def adicionar_predecessora(
+        atividade
+    ):
+
+        predecessoras.append(
+            atividade
+        )
+
+        atualizar_telas()
+
+    def adicionar_sucessora(
+        atividade
+    ):
+
+        sucessoras.append(
+            atividade
+        )
+
+        atualizar_telas()
+
+    def limpar_etapa():
+
+        etapa_filtro.value = None
+
+        atualizar_telas()
+
+    def salvar():
+
+        if not atividade_focal.value:
+
+            ui.notify(
+                "Selecione uma atividade",
+                color="negative"
+            )
+
+            return
+
+        excluir_todas_dependencias_atividade(
+            atividade_focal.value
+        )
+
+        for pred in predecessoras:
+
+            criar_dependencia(
+                pred["id_atividade"],
+                atividade_focal.value
+            )
+
+        for suc in sucessoras:
+
+            criar_dependencia(
+                atividade_focal.value,
+                suc["id_atividade"]
+            )
+
+        ui.notify(
+            "Dependências salvas",
+            color="positive"
+        )
+
+        atualizar_resumo()
+
+    def cancelar():
+
+        predecessoras.clear()
+        sucessoras.clear()
+
+        atualizar_telas()
+
+    with pagina("Dependências"):
+
+        ui.label(
+            "Cadastro de Dependências"
+        ).classes(
+            "text-3xl font-bold"
+        )
+
+        ui.label(
+            "Defina predecessoras e sucessoras das atividades"
+        )
+
+        with ui.row().classes(
+            "w-full gap-4 mt-4"
+        ):
+
+            etapa_filtro = ui.select(
+                {
+                    e["id_etapa"]:
+                    e["etapa"]
+                    for e in etapas
+                },
+                label="Filtrar Etapa"
+            ).classes(
+                "w-72"
+            )
+
+            etapa_filtro.on(
+                "update:model-value",
+                lambda _: atualizar_telas()
+            )
+
+            ui.button(
+                "Limpar Filtro",
+                icon="filter_alt_off",
+                on_click=lambda:
+                limpar_etapa()
+            )
+
+            atividade_focal = ui.select(
+                {
+                    a["id_atividade"]:
+                    a["atividade"]
+                    for a in atividades
+                },
+                label="Atividade Focal"
+            ).classes(
+                "w-[500px]"
+            )
+
+            atividade_focal.on(
+                "update:model-value",
+                lambda _:
+                carregar_dependencias()
+            )
+
+        with ui.row().classes(
+            "w-full mt-6 justify-center gap-4"
+        ):
+
+            with ui.card().classes(
+                "w-[280px] min-h-[250px]"
+            ):
+
+                ui.label(
+                    "PREDECESSORAS"
+                ).classes(
+                    "font-bold text-lg"
+                )
+
+                painel_predecessoras.move(
+                    target_container=
+                    ui.context.slot.parent
+                )
+
+            with ui.card().classes(
+                "w-[220px] h-[180px] items-center justify-center"
+            ):
+
+                ui.icon(
+                    "account_tree"
+                ).classes(
+                    "text-5xl text-blue-600"
+                )
+
+                ui.label(
+                    "ATIVIDADE FOCAL"
+                ).classes(
+                    "font-bold"
+                )
+
+            with ui.card().classes(
+                "w-[280px] min-h-[250px]"
+            ):
+
+                ui.label(
+                    "SUCESSORAS"
+                ).classes(
+                    "font-bold text-lg"
+                )
+
+                painel_sucessoras.move(
+                    target_container=
+                    ui.context.slot.parent
+                )
+
+        with ui.card().classes(
+            "w-full mt-6"
+        ):
+
+            ui.label(
+                "Atividades Disponíveis"
+            ).classes(
+                "text-xl font-bold"
+            )
+
+            painel_disponiveis.move(
+                target_container=
+                ui.context.slot.parent
+            )
+
+        with ui.row().classes(
+            "gap-4 mt-6"
+        ):
+
+            ui.button(
+                "Salvar",
+                icon="save",
+                on_click=salvar
+            ).props(
+                "color=positive"
+            )
+
+            ui.button(
+                "Cancelar",
+                icon="refresh",
+                on_click=cancelar
+            ).props(
+                "color=negative"
+            )
+
+        with ui.card().classes(
+            "w-full mt-8"
+        ):
+
+            painel_resumo.move(
+                target_container=
+                ui.context.slot.parent
+            )
+
+    atualizar_telas()
+=== ./telas/dashboard.py ===
+
+from nicegui import ui
+from components.layout import pagina
+
+
+def tela_dashboard():
+
+    with pagina('Dashboard'):
+
+        ui.label(
+            'Bem-vindo ao Projeto RACI'
+        ).classes(
+            'text-h4'
+        )
+=== ./telas/gantt.py ===
+
+from nicegui import ui
+from components.layout import pagina
+
+
+def tela_gantt():
+
+    with pagina('Gantt'):
+
+        ui.label('Tela do Gantt')
+=== ./config.py ===
+
+
+=== ./crud_old.py ===
+
+from db import get_connection
+
+# Listar Seeds
+def listar_etapas():
+    conn = get_connection()
+
+    rows = conn.execute("""
+        SELECT
+            id_etapa,
+            etapa
+        FROM tb_etapa
+        ORDER BY etapa
+    """).fetchall()
+
+    conn.close()
+
+    return rows
+
+def listar_areas():
+    conn = get_connection()
+
+    rows = conn.execute("""
+        SELECT
+            id_area,
+            area
+        FROM tb_area
+        ORDER BY area
+    """).fetchall()
+
+    conn.close()
+
+    return rows
+
+def listar_clientes():
+    conn = get_connection()
+
+    rows = conn.execute("""
+        SELECT cliente_id, cliente
+        FROM tb_business_unit
+        ORDER BY cliente
+    """).fetchall()
+
+    conn.close()
+    return rows
+
+def listar_projetos():
+    conn = get_connection()
+
+    rows = conn.execute("""
+        SELECT
+            p.id_projeto,
+            p.projeto,
+            b.cliente
+        FROM tb_projeto p
+        JOIN tb_business_unit b
+            ON p.cliente_id = b.cliente_id
+        ORDER BY p.projeto
+    """).fetchall()
+
+    conn.close()
+    return rows
+
+def listar_responsaveis():
+    conn = get_connection()
+
+    rows = conn.execute("""
+        SELECT
+            r.id_responsavel,
+            r.responsavel,
+            r.id_area,
+            a.area
+        FROM tb_responsavel r
+        JOIN tb_area a
+            ON r.id_area = a.id_area
+        ORDER BY r.responsavel
+    """).fetchall()
+
+    conn.close()
+
+    return rows
+
+def listar_alocacoes():
+    conn = get_connection()
+
+    rows = conn.execute("""
+        SELECT
+            a.id_projeto,
+            p.projeto,
+
+            a.id_atividade,
+            at.atividade,
+
+            a.id_raci,
+            l.legenda_raci,
+
+            a.id_area,
+            ar.area
+
+        FROM tb_alocacao a
+
+        JOIN tb_projeto p
+            ON p.id_projeto = a.id_projeto
+
+        JOIN tb_atividade at
+            ON at.id_atividade = a.id_atividade
+
+        JOIN tb_legenda_raci l
+            ON l.id_raci = a.id_raci
+
+        JOIN tb_area ar
+            ON ar.id_area = a.id_area
+
+        ORDER BY p.projeto, at.atividade
+    """).fetchall()
+
+    conn.close()
+    return rows
+
+def listar_status():
+    conn = get_connection()
+
+    rows = conn.execute("""
+        SELECT
+            id_projeto,
+            id_atividade,
+            dt_inicio_real,
+            dt_inicio_previsto,
+            dt_fim_real,
+            dt_fim_previsto
+        FROM tb_status
+    """).fetchall()
+
+    conn.close()
+    return rows
+
+def listar_legenda_raci():
+    conn = get_connection()
+
+    rows = conn.execute("""
+        SELECT
+            id_raci,
+            legenda_raci,
+            desc_raci
+        FROM tb_legenda_raci
+        ORDER BY legenda_raci
+    """).fetchall()
+
+    conn.close()
+    return rows
+
+def listar_atividades():
+    conn = get_connection()
+
+    rows = conn.execute("""
+        SELECT
+            a.id_etapa,
+            a.id_atividade,
+            a.atividade,
+            e.etapa
+        FROM tb_atividade a
+        LEFT JOIN tb_etapa e
+            ON e.id_etapa = a.id_etapa
+        ORDER BY a.id_atividade
+    """).fetchall()
+
+    conn.close()
+    return rows
+
+def listar_atividades_por_etapa(id_etapa):
+    conn = get_connection()
+
+    rows = conn.execute("""
+        SELECT
+            id_atividade,
+            atividade
+        FROM tb_atividade
+        WHERE id_etapa = ?
+        ORDER BY atividade
+    """, (id_etapa,)).fetchall()
+
+    conn.close()
+
+    return rows
+# CRUD Responsáveis (Criar- Atualizar - Excluir)
+def criar_responsavel(nome, id_area):
+    conn = get_connection()
+
+    conn.execute("""
+        INSERT INTO tb_responsavel
+        (id_area, responsavel)
+        VALUES (?, ?)
+    """, (id_area, nome))
+
+    conn.commit()
+    conn.close()
+
+def atualizar_responsavel(
+    id_responsavel,
+    nome,
+    id_area
+):
+    conn = get_connection()
+
+    conn.execute("""
+        UPDATE tb_responsavel
+        SET
+            responsavel = ?,
+            id_area = ?
+        WHERE id_responsavel = ?
+    """, (
+        nome,
+        id_area,
+        id_responsavel
+    ))
+
+    conn.commit()
+    conn.close()
+
+def excluir_responsavel(
+    id_responsavel
+):
+    conn = get_connection()
+
+    conn.execute("""
+        DELETE FROM tb_responsavel
+        WHERE id_responsavel = ?
+    """, (id_responsavel,))
+
+    conn.commit()
+    conn.close()
+
+# CRUD Projetos (Criar- Atualizar - Excluir)
+
+def criar_projeto(cliente_id, projeto):
+    conn = get_connection()
+
+    conn.execute("""
+        INSERT INTO tb_projeto (cliente_id, projeto)
+        VALUES (?, ?)
+    """, (cliente_id, projeto))
+
+    conn.commit()
+    conn.close()
+
+def atualizar_projeto(id_projeto, cliente_id, projeto):
+    conn = get_connection()
+
+    conn.execute("""
+        UPDATE tb_projeto
+        SET cliente_id = ?, projeto = ?
+        WHERE id_projeto = ?
+    """, (cliente_id, projeto, id_projeto))
+
+    conn.commit()
+    conn.close()
+
+def excluir_projeto(id_projeto):
+    conn = get_connection()
+
+    conn.execute("""
+        DELETE FROM tb_projeto
+        WHERE id_projeto = ?
+    """, (id_projeto,))
+
+    conn.commit()
+    conn.close()
+
+# CRUD Alocações (Criar- Atualizar - Excluir)
+
+def criar_alocacao(
+    id_projeto,
+    id_atividade,
+    id_raci,
+    id_area
+):
+    conn = get_connection()
+
+    conn.execute("""
+        INSERT INTO tb_alocacao (
+            id_projeto,
+            id_atividade,
+            id_raci,
+            id_area
+        )
+        VALUES (?, ?, ?, ?)
+    """, (
+        id_projeto,
+        id_atividade,
+        id_raci,
+        id_area
+    ))
+
+    conn.commit()
+    conn.close()
+
+def atualizar_alocacao(
+    id_projeto,
+    id_atividade,
+    id_raci,
+    id_area
+):
+    conn = get_connection()
+
+    conn.execute("""
+        UPDATE tb_alocacao
+        SET
+            id_responsavel = ?,
+            id_raci = ?,
+            id_area = ?
+        WHERE id_projeto = ?
+          AND id_atividade = ?
+    """, (
+        id_responsavel,
+        id_raci,
+        id_area,
+        id_projeto,
+        id_atividade
+    ))
+
+    conn.commit()
+    conn.close()
+
+def excluir_alocacao(id_projeto, id_atividade):
+    conn = get_connection()
+
+    conn.execute("""
+        DELETE FROM tb_alocacao
+        WHERE id_projeto = ?
+          AND id_atividade = ?
+    """, (id_projeto, id_atividade))
+
+    conn.commit()
+    conn.close()
+=== ./components/menu.py ===
+
+from nicegui import ui
+
+
+def menu_lateral():
+
+    with ui.left_drawer().classes(
+        'bg-slate-800 text-white'
+    ):
+
+        ui.label(
+            'PROJETO RACI'
+        ).classes(
+            'text-h6 q-pa-md'
+        )
+
+        ui.separator()
+
+        ui.button(
+            'Dashboard',
+            icon='dashboard',
+            on_click=lambda: ui.navigate.to('/')
+        ).props('flat color=white')
+
+        ui.button(
+            'Responsáveis (Focais)',
+            icon='people',
+            on_click=lambda: ui.navigate.to('/responsaveis')
+        ).props('flat color=white')
+
+        ui.button(
+            'Projetos',
+            icon='folder',
+            on_click=lambda: ui.navigate.to('/projetos')
+        ).props('flat color=white')
+
+        ui.button(
+            'Alocações',
+            icon='task',
+            on_click=lambda: ui.navigate.to('/alocacoes')
+        ).props('flat color=white')
+
+        ui.button(
+            'Dependências',
+            icon='account_tree',
+            on_click=lambda: ui.navigate.to('/dependencias')
+        ).props('flat color=white')
+
+        ui.button(
+            'Gantt',
+            icon='timeline',
+            on_click=lambda: ui.navigate.to('/gantt')
+        ).props('flat color=white')
+=== ./components/layout.py ===
+
+from nicegui import ui
+from components.menu import menu_lateral
+
+
+def pagina(titulo):
+
+    menu_lateral()
+
+    with ui.header().classes(
+        'bg-blue-700 text-white'
+    ):
+        ui.label(titulo).classes(
+            'text-h5'
+        )
+
+    with ui.column().classes(
+        'w-full p-6'
+    ):
+        return ui.column().classes(
+            'w-full'
+        )
+=== ./components/crud_template.py ===
+
+from nicegui import ui
+
+
+def crud_page(
+    titulo: str,
+    subtitulo: str,
+    columns: list,
+    listar_func,
+    salvar_func,
+    atualizar_func=None,
+    excluir_func=None,
+    form_builder=None,
+    preencher_form=None,
+    obter_form=None,
+    limpar_form=None,
+    key_fields=None,
+):
+
+    if key_fields is None:
+        key_fields = ["id"]
+
+    registro_em_edicao = {
+        "value": None
+    }
+
+    dados_originais = []
+
+    ultimo_texto_busca = {
+        "value": ""
+    }
+
+    def atualizar_tabela():
+
+        nonlocal dados_originais
+
+        dados_originais = [
+            dict(r)
+            for r in listar_func()
+        ]
+
+        aplicar_filtro()
+
+    def aplicar_filtro():
+
+        filtro = busca.value or ""
+        filtro = filtro.strip().lower()
+
+        if filtro == "":
+
+            tabela.rows = dados_originais
+            tabela.update()
+            return
+
+        linhas_filtradas = []
+
+        for row in dados_originais:
+
+            encontrou = False
+
+            for valor in row.values():
+
+                if valor is None:
+                    continue
+
+                if filtro in str(valor).lower():
+                    encontrou = True
+                    break
+
+            if encontrou:
+                linhas_filtradas.append(row)
+
+        tabela.rows = linhas_filtradas
+        tabela.update()
+
+    def monitorar_busca():
+
+        texto_atual = busca.value or ""
+
+        if texto_atual != ultimo_texto_busca["value"]:
+
+            ultimo_texto_busca["value"] = texto_atual
+
+            aplicar_filtro()
+
+    def salvar():
+
+        dados = obter_form()
+
+        if registro_em_edicao["value"] is None:
+
+            salvar_func(*dados)
+
+            ui.notify(
+                "Criado com sucesso",
+                color="positive"
+            )
+
+        else:
+
+            if atualizar_func:
+
+                atualizar_func(
+                    *registro_em_edicao["value"],
+                    *dados
+                )
+
+                ui.notify(
+                    "Atualizado com sucesso",
+                    color="positive"
+                )
+
+        if limpar_form:
+            limpar_form()
+
+        registro_em_edicao["value"] = None
+
+        atualizar_tabela()
+
+    def editar():
+
+        if not preencher_form:
+            return
+
+        selecionados = tabela.selected
+
+        if not selecionados:
+
+            ui.notify(
+                "Selecione um registro",
+                color="warning"
+            )
+
+            return
+
+        row = selecionados[0]
+
+        registro_em_edicao["value"] = [
+            row[campo]
+            for campo in key_fields
+        ]
+
+        preencher_form(row)
+
+    def excluir():
+
+        if not excluir_func:
+            return
+
+        selecionados = tabela.selected
+
+        if not selecionados:
+
+            ui.notify(
+                "Selecione um registro",
+                color="warning"
+            )
+
+            return
+
+        row = selecionados[0]
+
+        excluir_func(
+            *[
+                row[campo]
+                for campo in key_fields
+            ]
+        )
+
+        if limpar_form:
+            limpar_form()
+
+        atualizar_tabela()
+
+        ui.notify(
+            "Excluído com sucesso",
+            color="positive"
+        )
+
+    with ui.column().classes(
+        "w-full items-center bg-slate-100 min-h-screen p-8"
+    ):
+
+        ui.label(titulo).classes(
+            "text-4xl font-bold text-blue-700"
+        )
+
+        ui.label(subtitulo).classes(
+            "text-lg text-gray-600 mb-4"
+        )
+
+        with ui.card().classes(
+            "w-full max-w-5xl shadow-lg"
+        ):
+
+            if form_builder:
+                form_builder()
+
+            with ui.row().classes(
+                "gap-2 mt-4"
+            ):
+
+                ui.button(
+                    "Salvar",
+                    icon="save",
+                    on_click=salvar
+                ).props("color=primary")
+
+                if atualizar_func:
+
+                    ui.button(
+                        "Editar",
+                        icon="edit",
+                        on_click=editar
+                    ).props("color=warning")
+
+                if excluir_func:
+
+                    ui.button(
+                        "Excluir",
+                        icon="delete",
+                        on_click=excluir
+                    ).props("color=negative")
+
+                if limpar_form:
+
+                    ui.button(
+                        "Cancelar",
+                        icon="close",
+                        on_click=limpar_form
+                    )
+
+        with ui.card().classes(
+            "w-full max-w-5xl mt-6 shadow-lg"
+        ):
+
+            busca = ui.input(
+                label="Buscar em todos os campos"
+            ).props(
+                "outlined clearable"
+            ).classes(
+                "w-full mb-4"
+            )
+
+            tabela = ui.table(
+                columns=columns,
+                rows=[],
+                row_key=key_fields[0],
+                selection="single",
+                pagination=10,
+            ).classes(
+                "w-full"
+            )
+
+            ui.timer(
+                0.2,
+                monitorar_busca
+            )
+
+            atualizar_tabela()

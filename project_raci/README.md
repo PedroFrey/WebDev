@@ -9,3 +9,10 @@ sqlite3 database.db
 Ctrl K Ctrl 0 for colapse functions
 5) run main
 /home/codespace/.python/current/bin/python /workspaces/WebDev/project_raci/main.py
+
+6)
+get context:
+find . -type f \( -name "*.py" -o -name "*.sql" \) -exec sh -c '
+echo "\n=== $1 ===\n"
+cat "$1"
+' _ {} \; > contexto_projeto.txt
